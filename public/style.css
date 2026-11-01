@@ -2,4 +2,6 @@
 #pairing{padding:16px;background:#eef6fb;border-radius:8px;margin:16px 0}#pair-code{display:block;word-break:break-all}ol{padding-left:22px}li{margin:8px 0}
 #remember-key{width:auto;flex:none;margin:12px 6px 0 0}
 .access-field{font-family:ui-monospace,Consolas,monospace;min-width:0}.access-row{margin-bottom:14px}
+.header-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.lang-toggle{font-size:13px;padding:6px 14px;border-radius:20px;cursor:pointer;font-weight:500}
 @media(max-width:700px){.section-top{flex-wrap:wrap}.section-top h2{margin-bottom:0}.section-top .row{width:100%}#onboarding-status{overflow-wrap:anywhere}}
