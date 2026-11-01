@@ -1,6 +1,6 @@
 import http from 'node:http';
 import {readFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {join,resolve} from 'node:path';
 import {randomUUID,timingSafeEqual} from 'node:crypto';
 import {projectRoot} from './storage.mjs';
 import {models,parseCompletion,completion,bufferedSSE} from './protocol.mjs';
@@ -37,10 +37,13 @@ export function createService({config,credentials,executor,store,pool,browsers,l
       const path=new URL(req.url,'http://localhost').pathname;
       if(closing)throw error('服务正在关闭',503,'shutdown');
       if(req.method==='GET'&&path==='/health')return json(res,200,{ok:true,mode:demo?'demo':'live',upstreamVerified:false});
-      if(req.method==='GET'&&['/','/admin.js','/style.css'].includes(path)) {
+      if(req.method==='GET'&&(['/','/admin.js','/style.css'].includes(path)||path.startsWith('/i18n/'))) {
+        const filePath=path==='/'?'index.html':path.slice(1);
+        const fullPath=resolve(projectRoot,'public',filePath);
+        if(!fullPath.startsWith(resolve(projectRoot,'public')))throw error('路径无效',403);
         res.setHeader('content-security-policy',"default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'");
         res.setHeader('content-type',path==='/'?'text/html; charset=utf-8':path.endsWith('.js')?'text/javascript; charset=utf-8':'text/css; charset=utf-8');
-        return res.end(await readFile(join(projectRoot,'public',path==='/'?'index.html':path.slice(1))));
+        return res.end(await readFile(fullPath));
       }
       if(path.startsWith('/bridge/')) {
         // This transport is intentionally local-only. The extension never gets
