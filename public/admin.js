@@ -191,6 +191,65 @@ const translations = {
   }
 };
 
+const messageDictionary = {
+  'Origin 不匹配': 'Origin mismatch (cross-site access denied)',
+  '鉴权失败': 'Authentication failed: invalid admin key',
+  '请等待当前操作完成': 'Please wait for the current operation to finish',
+  '服务正在关闭': 'Service is shutting down',
+  '配对码无效或已过期': 'Pairing code is invalid or expired',
+  '已改为常用浏览器扩展接入，请生成配对码后连接专用 Build 标签页': 'Extension required; please generate a pairing code and connect via the Build browser extension',
+  '浏览器扩展仅允许本机连接': 'Browser extension only allowed to connect locally',
+  '此实例不支持扩展连接': 'This instance does not support extension connections',
+  '此实例不支持扩展配对': 'This instance does not support extension pairing',
+  '此实例不支持扩展接入': 'This instance does not support extension onboarding',
+  '路由不存在': 'Route not found',
+  '请先完成或取消账号管理操作': 'Please complete or cancel account management operation first',
+  '演示模式不打开 Google 登录': 'Demo mode cannot open Google login',
+  '演示模式不导入账号': 'Demo mode cannot import accounts',
+  '实例不匹配；拒绝停止其他服务': 'Instance ID mismatch; refused to stop other service',
+  '账号不存在': 'Account not found',
+  '扩展路由不存在': 'Extension route not found',
+  '扩展接口需要 POST': 'Extension endpoint requires POST',
+  '扩展连接已失效，请重新配对': 'Extension connection expired, please re-pair',
+  '自动连接授权已失效，请在管理页重新接入一次': 'Auto-connection authorization expired, please re-pair in the admin dashboard',
+  '此账号已停用': 'This account is disabled',
+  '该 Google 账号已导入，请使用重新登录': 'This Google account is already imported; please re-login',
+  '有请求在执行，请稍后接入账号': 'A request is currently running; please connect account later',
+  '请求已取消': 'Request cancelled',
+  '客户端已断开': 'Client disconnected',
+  '等待你在常用浏览器完成 Google 登录': 'Waiting for you to complete Google login in your browser',
+  '正在新建专用 Build 项目（仅提交一次）': 'Creating dedicated Build project (submitted once)',
+  '等待 Google 完成专用项目初始化': 'Waiting for Google to finish dedicated project initialization',
+  '正在打开已记住的专用项目': 'Opening saved dedicated project',
+  '账号、专用项目和扩展已自动接入': 'Account, dedicated project, and extension connected successfully',
+  '已取消接入': 'Onboarding cancelled',
+  '已自动恢复专用项目连接': 'Automatically restored dedicated project connection',
+  '等待 Build 页面就绪': 'Waiting for Build page to be ready',
+  '已断开；此浏览器不再自动恢复该账号': 'Disconnected; this browser will no longer auto-reconnect this account',
+  '正在核对当前项目并连接…': 'Verifying project and connecting…',
+  '扩展连接失败，请检查本机服务和当前项目。': 'Extension connection failed; please check the local service and current project.',
+  '正在开始接入，请勿重复点击': 'Starting connection, please do not click repeatedly',
+  '已有接入流程，请先完成或取消': 'An onboarding process is already in progress, please complete or cancel it first',
+  '接入凭据已过期，请重新开始；已创建的专用项目会保留': 'Connection credentials expired, please start over; created projects will be preserved',
+  '请使用管理页的“登录并自动接入”': 'Please use "Login & Auto-Connect" on the admin page',
+  '请在安装了 Build 本机连接器的常用 Chrome／Edge 中打开此管理页并刷新': 'Please open this dashboard in Chrome/Edge with the Build extension installed and refresh',
+  '管理端鉴权成功；能否调用请看账号的 Build 执行连接状态。': 'Admin authentication successful; check account connection status for readiness.',
+  '已打开常用浏览器中的 Build。请完成 Google 登录，项目创建和接入会自动继续。': 'Opened Build in your browser. Please log in with Google; project creation and pairing will proceed automatically.',
+  '已取消后续接入步骤；已创建的项目保留。': 'Cancelled subsequent onboarding steps; existing projects preserved.',
+  '请把配对码填入常用浏览器的 Build 本机连接器。无需管理员密钥或 Cookie。': 'Enter the pairing code into the Build browser extension. No admin key or cookies needed.',
+  '已退出，已清除本浏览器保存的管理密钥': 'Logged out; saved admin key cleared from this browser.',
+  '账号状态已更新': 'Account status updated.',
+  '已断开扩展；Google 登录状态保留在浏览器。': 'Extension disconnected; Google login session remains intact in browser.',
+  '请求失败': 'Request failed',
+  '扩展连接失败': 'Extension connection failed'
+};
+
+function translateMsg(str) {
+  if (!str) return '';
+  if (currentLang === 'zh') return str;
+  return messageDictionary[str] || str;
+}
+
 let currentLang = 'zh';
 try { currentLang = localStorage.getItem('build-lang') || 'zh'; } catch {}
 const t = (key, ...args) => {
@@ -242,13 +301,13 @@ async function extensionState(){
   try{
     const probe=await extension('probe');extensionReady=true;$('extension-status').textContent=t('ext_detected',probe.version);
     const value=await extension('status');$('onboarding-status').replaceChildren();let active=false;
-    for(const job of value.jobs||[]){$('onboarding-status').append(element('p',(job.email?job.email+' · ':'')+job.message));if(!['connected','error','cancelled'].includes(job.stage))active=true;}
-    if(value.connectionError)$('onboarding-status').append(element('p',t('ext_err_prefix')+value.connectionError,'error'));
-    for(const item of value.reconnect||[])$('onboarding-status').append(element('p',(item.email?item.email+' · ':'')+item.message));
+    for(const job of value.jobs||[]){$('onboarding-status').append(element('p',(job.email?job.email+' · ':'')+translateMsg(job.message)));if(!['connected','error','cancelled'].includes(job.stage))active=true;}
+    if(value.connectionError)$('onboarding-status').append(element('p',t('ext_err_prefix')+translateMsg(value.connectionError),'error'));
+    for(const item of value.reconnect||[])$('onboarding-status').append(element('p',(item.email?item.email+' · ':'')+translateMsg(item.message)));
     $('cancel-onboarding').hidden=!active;return active;
-  }catch(e){extensionReady=false;$('extension-status').textContent=e.message;$('cancel-onboarding').hidden=true;return false;}
+  }catch(e){extensionReady=false;$('extension-status').textContent=translateMsg(e.message);$('cancel-onboarding').hidden=true;return false;}
 }
-function message(text,bad=false){$('message').textContent=text;$('message').className=bad?'error':'';}
+function message(text,bad=false){$('message').textContent=translateMsg(text);$('message').className=bad?'error':'';}
 function clearApiAccess(){ $('api-key').value='';$('api-key').type='password';$('toggle-api-key').textContent=t('api_show');$('toggle-api-key').setAttribute('aria-pressed','false'); }
 async function copyAccess(id,labelKey){
   if(!$(id).value)return message(t('msg_connect_first'),true);
@@ -257,7 +316,7 @@ async function copyAccess(id,labelKey){
 }
 async function api(path,body){
   const response=await fetch(path,{method:body===undefined?'GET':'POST',headers:{Authorization:'Bearer '+token,...(body!==undefined?{'Content-Type':'application/json'}:{})},...(body!==undefined?{body:JSON.stringify(body)}:{})});
-  const value=await response.json();if(!response.ok){if(response.status===401)clearApiAccess();throw new Error(value.error?.message||t('req_failed'));}return value;
+  const value=await response.json();if(!response.ok){if(response.status===401)clearApiAccess();throw new Error(translateMsg(value.error?.message)||t('req_failed'));}return value;
 }
 function element(tag,text,className){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;}
 function action(label,fn){const b=element('button',label,'secondary');b.addEventListener('click',()=>perform(b,fn));return b;}
